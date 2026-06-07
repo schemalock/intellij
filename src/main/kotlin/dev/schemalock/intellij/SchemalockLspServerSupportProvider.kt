@@ -10,7 +10,6 @@ class SchemalockLspServerSupportProvider : LspServerSupportProvider {
 
     override fun fileOpened(project: Project, file: VirtualFile, serverStarter: LspServerStarter) {
         if (file.extension != "yaml") return
-        if (!hasLockfile(project)) return
         serverStarter.ensureServerStarted(SchemalockLspServerDescriptor(project))
     }
 
