@@ -14,7 +14,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 dependencies {
@@ -23,7 +23,7 @@ dependencies {
 }
 
 intellij {
-    version.set("2024.1")
+    version.set("2024.2")
     type.set("IC")
     pluginName.set("schemalock-intellij")
     downloadSources.set(false)
@@ -35,7 +35,7 @@ tasks {
     }
 
     patchPluginXml {
-        sinceBuild.set("241")
+        sinceBuild.set("242")
         untilBuild.set("")
     }
 
