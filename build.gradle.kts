@@ -24,7 +24,7 @@ dependencies {
 
 intellij {
     version.set("2024.2")
-    type.set("IC")
+    type.set("IU")
     pluginName.set("schemalock-intellij")
     downloadSources.set(false)
 }
