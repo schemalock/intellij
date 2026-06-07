@@ -46,7 +46,7 @@ object LspRequestHelper {
         return try {
             val result = sendCustomRequest(server, "schemalock/getDocumentState", mapOf("uri" to uri))
             gson.fromJson(result as? JsonObject ?: return null, DocumentState::class.java)
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             null
         }
     }
@@ -55,7 +55,7 @@ object LspRequestHelper {
         val server = findServer(project) ?: return
         try {
             sendCustomRequest(server, "schemalock/setDocumentVersionOverride", mapOf("uri" to uri, "version" to version))
-        } catch (_: Exception) {}
+        } catch (_: Throwable) {}
     }
 
     fun listVersionsForGroup(project: Project, group: String): List<String> {
