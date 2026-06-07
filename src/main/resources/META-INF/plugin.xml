@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>dev.schemalock.intellij</id>
+    <name>SchemaLock</name>
+    <vendor url="https://schemalock.dev">SchemaLock</vendor>
+    <description><![CDATA[
+        Versioned, integrity-pinned schemas for YAML files.<br/>
+        Provides autocomplete and validation for Kubernetes CRDs and other ecosystems
+        from <a href="https://cdn.schemalock.dev">cdn.schemalock.dev</a>.
+        Requires a <code>schemalock.lock</code> file in the project root.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <platform.lsp.serverSupportProvider
+            implementation="dev.schemalock.intellij.SchemalockLspServerSupportProvider"/>
+        <statusBarWidgetFactory
+            id="SchemalockDocumentStatus"
+            implementation="dev.schemalock.intellij.DocumentStatusWidgetFactory"
+            order="after Position"/>
+    </extensions>
+</idea-plugin>
