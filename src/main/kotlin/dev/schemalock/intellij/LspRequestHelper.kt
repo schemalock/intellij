@@ -77,6 +77,6 @@ object LspRequestHelper {
 
     private fun sendCustomRequest(server: LspServer, method: String, params: Any): Any? {
         val endpoint = ServiceEndpoints.toEndpoint(server.lsp4jServer)
-        return endpoint.request(method, params).get()
+        return endpoint.request(method, params).get(5, java.util.concurrent.TimeUnit.SECONDS)
     }
 }

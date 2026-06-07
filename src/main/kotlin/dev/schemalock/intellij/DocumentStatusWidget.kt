@@ -79,6 +79,12 @@ class DocumentStatusWidget(private val project: Project) : StatusBarWidget, Text
                 val newVersion = if (chosen.label == state.version) "" else chosen.label
                 ApplicationManager.getApplication().executeOnPooledThread {
                     LspRequestHelper.sendVersionOverride(project, uri, newVersion)
+                    val file = com.intellij.openapi.vfs.VirtualFileManager.getInstance().findFileByUrl(uri)
+                    if (file != null) {
+                        ApplicationManager.getApplication().invokeLater {
+                            LspRequestHelper.refreshState(project, file, this@DocumentStatusWidget)
+                        }
+                    }
                 }
             }
             .createPopup()

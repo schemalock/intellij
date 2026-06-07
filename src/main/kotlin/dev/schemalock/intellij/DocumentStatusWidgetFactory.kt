@@ -10,7 +10,8 @@ class DocumentStatusWidgetFactory : StatusBarWidgetFactory {
 
     override fun getId(): String = DocumentStatusWidget.ID
     override fun getDisplayName(): String = "SchemaLock Schema Version"
-    override fun isAvailable(project: Project): Boolean = true
+    override fun isAvailable(project: Project): Boolean =
+        SchemalockLspServerSupportProvider.hasLockfile(project)
     override fun canBeEnabledOn(statusBar: StatusBar): Boolean = true
 
     override fun createWidget(project: Project): StatusBarWidget {
