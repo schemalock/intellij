@@ -1,1 +1,17 @@
-rootProject.name = "schemalock-intellij"
+import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
+
+plugins {
+    id("org.jetbrains.intellij.platform.settings") version "2.7.1"
+}
+
+@Suppress("UnstableApiUsage")
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        intellijPlatform {
+            defaultRepositories()
+        }
+    }
+}
+
+rootProject.name = "schemalock"

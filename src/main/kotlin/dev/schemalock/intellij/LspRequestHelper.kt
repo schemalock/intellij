@@ -1,7 +1,5 @@
 package dev.schemalock.intellij
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
@@ -10,9 +8,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspServer
 import com.intellij.platform.lsp.api.LspServerManager
 import com.intellij.util.messages.MessageBusConnection
-import org.eclipse.lsp4j.jsonrpc.services.ServiceEndpoints
-
-private val gson = Gson()
 
 object LspRequestHelper {
 
@@ -44,8 +39,7 @@ object LspRequestHelper {
     private fun getDocumentState(project: Project, uri: String): DocumentState? {
         val server = findServer(project) ?: return null
         return try {
-            val result = sendCustomRequest(server, "schemalock/getDocumentState", mapOf("uri" to uri))
-            gson.fromJson(result as? JsonObject ?: return null, DocumentState::class.java)
+            server.sendRequestSync { (it as SchemalockLspServer).getDocumentState(GetDocumentStateParams(uri)) }
         } catch (_: Throwable) {
             null
         }
@@ -54,17 +48,15 @@ object LspRequestHelper {
     fun sendVersionOverride(project: Project, uri: String, version: String) {
         val server = findServer(project) ?: return
         try {
-            sendCustomRequest(server, "schemalock/setDocumentVersionOverride", mapOf("uri" to uri, "version" to version))
+            server.sendRequestSync { (it as SchemalockLspServer).setDocumentVersionOverride(SetVersionOverrideParams(uri, version)) }
         } catch (_: Throwable) {}
     }
 
     fun listVersionsForGroup(project: Project, group: String): List<String> {
         val server = findServer(project) ?: return emptyList()
         return try {
-            val result = sendCustomRequest(server, "schemalock/listVersionsForGroup", mapOf("group" to group))
-            val obj = result as? JsonObject ?: return emptyList()
-            val arr = obj.getAsJsonArray("versions") ?: return emptyList()
-            arr.map { it.asString }
+            server.sendRequestSync { (it as SchemalockLspServer).listVersionsForGroup(ListVersionsParams(group)) }?.versions
+                ?: emptyList()
         } catch (_: Exception) {
             emptyList()
         }
@@ -74,9 +66,4 @@ object LspRequestHelper {
         LspServerManager.getInstance(project)
             .getServersForProvider(SchemalockLspServerSupportProvider::class.java)
             .firstOrNull()
-
-    private fun sendCustomRequest(server: LspServer, method: String, params: Any): Any? {
-        val endpoint = ServiceEndpoints.toEndpoint(server.lsp4jServer)
-        return endpoint.request(method, params).get(5, java.util.concurrent.TimeUnit.SECONDS)
-    }
 }

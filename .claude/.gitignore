@@ -1,0 +1,10 @@
+# Per-developer / transient — not shared (matches vscode/ convention)
+CLAUDE.md
+plans/active-plan.md
+plans/archive/
+skills/
+memory/scratchpad.md
+
+# Tracked (shared): plans/implementation-summary.md, memory/decisions.md
+!plans/implementation-summary.md
+!memory/decisions.md

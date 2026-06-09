@@ -8,7 +8,7 @@ import java.io.File
 object BinaryResolver {
 
     fun resolve(): File {
-        val plugin = PluginManagerCore.getPlugin(PluginId.getId("dev.schemalock.intellij"))
+        val plugin = PluginManagerCore.getPlugin(PluginId.getId("dev.schemalock"))
             ?: error("SchemaLock plugin not found in plugin manager")
         val dir = platformDir(System.getProperty("os.name"), System.getProperty("os.arch"))
         val name = if (SystemInfo.isWindows) "schemalock.exe" else "schemalock"

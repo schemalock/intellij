@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>dev.schemalock.intellij</id>
+    <id>dev.schemalock</id>
     <name>SchemaLock</name>
     <vendor url="https://schemalock.dev">SchemaLock</vendor>
     <description><![CDATA[
