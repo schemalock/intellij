@@ -6,7 +6,8 @@
         Versioned, integrity-pinned schemas for YAML files.<br/>
         Provides autocomplete and validation for Kubernetes CRDs and other ecosystems
         from <a href="https://cdn.schemalock.dev">cdn.schemalock.dev</a>.
-        Requires a <code>schemalock.lock</code> file in the project root.
+        Pin schema versions per directory with an optional <code>schemalock.yaml</code> file;
+        unpinned resources resolve to the latest version from the CDN.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>

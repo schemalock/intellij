@@ -8,7 +8,7 @@ class DocumentStateTest {
     @Test fun `pinned shows lock icon with kind and version`() {
         val s = DocumentState(state = 1, kind = "VMCluster", version = "0.48.4", group = "operator.victoriametrics.com")
         assertEquals("🔒 VMCluster · 0.48.4", s.widgetText())
-        assertEquals("SchemaLock: pinned operator.victoriametrics.com@0.48.4 (from schemalock.lock)", s.widgetTooltip())
+        assertEquals("SchemaLock: pinned operator.victoriametrics.com@0.48.4 (from schemalock.yaml)", s.widgetTooltip())
     }
 
     @Test fun `unpinned shows unlock icon`() {

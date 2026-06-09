@@ -22,7 +22,7 @@ fun DocumentState.widgetText(): String? = when (state) {
 }
 
 fun DocumentState.widgetTooltip(): String? = when (state) {
-    1 -> "SchemaLock: pinned ${group}@${version} (from schemalock.lock)"
+    1 -> "SchemaLock: pinned ${group}@${version} (from schemalock.yaml)"
     2 -> "SchemaLock: unpinned ${group}@${version} (latest from CDN). Click to pin a version."
     3 -> "SchemaLock: preview ${group}@${version} (this session only). Click to change."
     4 -> "SchemaLock: CDN unreachable — ${errMsg ?: "unknown error"}. Click to retry."
