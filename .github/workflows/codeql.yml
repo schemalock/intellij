@@ -30,10 +30,12 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
-      # Manual build mode: CodeQL observes this compile. No bundled binary needed
-      # to compile the Kotlin sources.
+      # Manual build mode: CodeQL traces this compile to build its database.
+      # gradle.properties enables the build cache, which would serve compileKotlin
+      # from cache (no compiler run) and leave CodeQL with no code to analyze
+      # ("didn't build any of it"). Force a real compile with clean + no build cache.
       - name: Compile for CodeQL
-        run: ./gradlew --no-daemon compileKotlin compileTestKotlin
+        run: ./gradlew --no-daemon --no-build-cache clean compileKotlin compileTestKotlin
 
       - uses: github/codeql-action/analyze@v4
         with:
