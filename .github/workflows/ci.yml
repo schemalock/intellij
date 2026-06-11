@@ -41,6 +41,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # verifyPlugin downloads several full IDE distributions (tens of GB).
+      # Reclaim space from preinstalled toolchains we don't use, inline to avoid
+      # adding a third-party action to the supply chain.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android \
+            /usr/local/share/boost "${AGENT_TOOLSDIRECTORY:-/opt/hostedtoolcache}"
+          sudo docker image prune --all --force || true
+          df -h /
+
       - uses: actions/create-github-app-token@v1
         id: app-token
         with:
