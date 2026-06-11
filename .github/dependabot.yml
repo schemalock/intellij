@@ -4,6 +4,11 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    ignore:
+      # JUnit 6.x is a breaking change (fails compileTestKotlin); stay on 5.x
+      # until the tests are migrated. Minor/patch 5.x updates still flow.
+      - dependency-name: "org.junit.jupiter:*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: "/"
     schedule:

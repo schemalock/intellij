@@ -126,8 +126,8 @@ build the `schemalock` binary yourself
 
 ## Building from source
 
-Toolchain: Kotlin 1.9.23, **JDK 21**, Gradle 8.7 wrapper, IntelliJ Platform
-Gradle Plugin 2.x, IDE target `IU` 2024.2.
+Toolchain: Kotlin 2.4.0, **JDK 21**, Gradle 9.5.1 wrapper, IntelliJ Platform
+Gradle Plugin 2.16, IDE target `IU` 2024.2.
 
 ```bash
 # Cross-compile the bundled schemalock binaries from ../app first

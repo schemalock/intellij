@@ -1,8 +1,9 @@
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
 plugins {
     id("java")
-    kotlin("jvm") version "1.9.23"
+    kotlin("jvm") version "2.4.0"
     id("org.jetbrains.intellij.platform")
 }
 
@@ -23,6 +24,9 @@ dependencies {
     }
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    // Gradle 9 no longer puts the JUnit Platform launcher on the test runtime
+    // classpath automatically — declare it explicitly.
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 intellijPlatform {
@@ -34,6 +38,15 @@ intellijPlatform {
         }
     }
     pluginVerification {
+        // Platform plugin 2.16 promotes INTERNAL_API_USAGES / DEPRECATED_API_USAGES
+        // to failures by default. We knowingly use PluginManagerCore.getPlugin
+        // (internal) in BinaryResolver and the deprecated DaemonCodeAnalyzer.restart;
+        // keep those as warnings and only fail on genuine compatibility/structure
+        // problems, as under the previous plugin version.
+        failureLevel = listOf(
+            VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS,
+            VerifyPluginTask.FailureLevel.INVALID_PLUGIN,
+        )
         ides {
             recommended()
         }
