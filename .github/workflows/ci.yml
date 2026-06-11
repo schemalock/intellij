@@ -21,7 +21,7 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       # Compile + pure-JVM unit tests (DocumentState, BinaryResolver,
       # SchemalockInspectionSuppressor). No bundled binary or IDE download
