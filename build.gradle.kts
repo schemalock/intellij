@@ -22,7 +22,7 @@ dependencies {
         bundledPlugin("org.jetbrains.plugins.yaml")
     }
     testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.0")
 }
 
 intellijPlatform {
