@@ -23,21 +23,22 @@ class DocumentStatusWidget(private val project: Project) : StatusBarWidget, Text
         const val ID = "SchemalockDocumentStatus"
     }
 
-    private data class Current(val uri: String, val state: DocumentState)
-
-    private val current = AtomicReference<Current?>(null)
+    @Volatile
+    private var currentUri: String? = null
+    private val currentState = AtomicReference<DocumentState?>(null)
     private var statusBar: StatusBar? = null
 
     override fun ID(): String = ID
     override fun getPresentation(): StatusBarWidget.WidgetPresentation = this
 
-    override fun getText(): String = current.get()?.state?.widgetText() ?: ""
-    override fun getTooltipText(): String? = current.get()?.state?.widgetTooltip()
+    override fun getText(): String = currentState.get()?.widgetText() ?: ""
+    override fun getTooltipText(): String? = currentState.get()?.widgetTooltip()
     override fun getAlignment(): Float = 0f
 
     override fun getClickConsumer(): Consumer<MouseEvent>? = Consumer { _ ->
-        val c = current.get() ?: return@Consumer
-        handleClick(c.uri, c.state)
+        val uri = currentUri ?: return@Consumer
+        val state = currentState.get() ?: return@Consumer
+        handleClick(uri, state)
     }
 
     override fun install(statusBar: StatusBar) {
@@ -45,12 +46,29 @@ class DocumentStatusWidget(private val project: Project) : StatusBarWidget, Text
     }
 
     override fun dispose() {
+        DocumentStateBus.getInstance(project).detach(this)
         statusBar = null
     }
 
-    fun update(uri: String?, state: DocumentState?) {
-        current.set(if (uri != null && state != null) Current(uri, state) else null)
+    /**
+     * Switch the displayed document (called on editor selection). Renders the
+     * last-known state from the bus immediately; a still-pending resolution
+     * arrives later via [onState]. Must be called on the EDT — every caller is
+     * a platform editor listener, so the `updateWidget` call needs no
+     * `invokeLater` (unlike [onState], which runs off a pooled request thread).
+     */
+    fun setCurrentFile(uri: String?) {
+        currentUri = uri
+        val cached = uri?.let { DocumentStateBus.getInstance(project).get(it) }
+        currentState.set(cached)
         statusBar?.updateWidget(ID)
+    }
+
+    /** A freshly resolved state arrived (server notification or poll). */
+    fun onState(uri: String, state: DocumentState) {
+        if (uri != currentUri) return
+        currentState.set(state)
+        ApplicationManager.getApplication().invokeLater { statusBar?.updateWidget(ID) }
     }
 
     private fun handleClick(uri: String, state: DocumentState) {
@@ -79,12 +97,7 @@ class DocumentStatusWidget(private val project: Project) : StatusBarWidget, Text
                 val newVersion = if (chosen.label == state.version) "" else chosen.label
                 ApplicationManager.getApplication().executeOnPooledThread {
                     LspRequestHelper.sendVersionOverride(project, uri, newVersion)
-                    val file = com.intellij.openapi.vfs.VirtualFileManager.getInstance().findFileByUrl(uri)
-                    if (file != null) {
-                        ApplicationManager.getApplication().invokeLater {
-                            LspRequestHelper.refreshState(project, file, this@DocumentStatusWidget)
-                        }
-                    }
+                    LspRequestHelper.refreshState(project, uri)
                 }
             }
             .createPopup()

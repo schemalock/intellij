@@ -15,8 +15,12 @@ class DocumentStatusWidgetFactory : StatusBarWidgetFactory {
 
     override fun createWidget(project: Project): StatusBarWidget {
         val widget = DocumentStatusWidget(project)
+        DocumentStateBus.getInstance(project).attach(widget)
         val conn = LspRequestHelper.connect(project, widget)
         Disposer.register(widget, conn)
+        // selectionChanged won't fire for an already-open editor, so seed the
+        // widget with whatever file is currently selected.
+        LspRequestHelper.syncToSelection(project, widget)
         return widget
     }
 
