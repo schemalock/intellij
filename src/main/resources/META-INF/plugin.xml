@@ -11,6 +11,7 @@
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <platform.lsp.serverSupportProvider
@@ -19,5 +20,8 @@
             id="SchemalockDocumentStatus"
             implementation="dev.schemalock.intellij.DocumentStatusWidgetFactory"
             order="after Position"/>
+        <lang.inspectionSuppressor
+            language="yaml"
+            implementationClass="dev.schemalock.intellij.SchemalockInspectionSuppressor"/>
     </extensions>
 </idea-plugin>

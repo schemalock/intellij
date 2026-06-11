@@ -1,3 +1,58 @@
+# Implementation Summary — 2026-06-11 — suppress-native-yaml-inspections
+
+## Agent
+implementer
+
+## Plan Reference
+`active-plan.md` — "Eliminate false diagnostics shown on SchemaLock-owned CRD YAML files" (InspectionSuppressor + daemon restart)
+
+## Changes Made
+
+### New files
+
+- `src/main/kotlin/dev/schemalock/intellij/SchemalockInspectionSuppressor.kt`
+  — `InspectionSuppressor` for YAML. Pure top-level `shouldSuppress(toolId, owned, isKey)` function (unit-testable, no PSI deps). PSI glue in `isSuppressedFor`: resolves `url` from `element.containingFile?.virtualFile?.url`, looks up `DocumentStateBus.getInstance(project).get(url)`, checks `state.state != 0` for ownership, uses `PsiTreeUtil.isAncestor(kv.key!!, element, false)` for key-position detection. `getSuppressActions` returns `SuppressQuickFix.EMPTY_ARRAY`. Constants `KUBERNETES_UNKNOWN_TOOL_IDS` (set of 3) and `SPELL_CHECK_TOOL_ID`.
+
+- `src/test/kotlin/dev/schemalock/intellij/SchemalockInspectionSuppressorTest.kt`
+  — JUnit 5 unit tests for `shouldSuppress`. Covers: not-owned (all 4 tool IDs, both isKey values) → false; owned + each k8s tool (both isKey values) → true; owned + spell check + isKey=true → true; owned + spell check + isKey=false → false; owned + unrelated tool → false. Mirrors `DocumentStateTest` style.
+
+### Edited files
+
+- `src/main/kotlin/dev/schemalock/intellij/DocumentStateBus.kt`
+  — Added `private val project: Project` ctor parameter. Added `invokeLater` block in `onState` after the existing `states[uri] = state` + `widget?.onState` lines: resolves `VirtualFile` + `PsiFile`, calls `DaemonCodeAnalyzer.getInstance(project).restart(psi)` on EDT with `project.isDisposed` guard. New imports: `DaemonCodeAnalyzer`, `ApplicationManager`, `VirtualFileManager`, `PsiManager`. `attach`/`detach`/`get`/`getInstance` untouched.
+
+- `src/main/resources/META-INF/plugin.xml`
+  — Added `<depends>org.jetbrains.plugins.yaml</depends>` after the platform depends. Added `<lang.inspectionSuppressor language="yaml" implementationClass="dev.schemalock.intellij.SchemalockInspectionSuppressor"/>` inside the existing extensions block.
+
+- `build.gradle.kts`
+  — Added `bundledPlugin("org.jetbrains.plugins.yaml")` inside `dependencies { intellijPlatform { … } }`.
+
+## API Surface Changes
+No new public API. `DocumentStateBus` ctor now takes `Project` — constructor injection handled by the platform service container; `getInstance` / call sites unchanged.
+
+## How to Test
+
+1. `./gradlew clean test buildPlugin` — green (all 13 `shouldSuppress` test cases pass, plugin ZIP built).
+2. Manual GoLand smoke check on a SchemaLock-owned CRD YAML (`state != 0`): Kubernetes "Unknown*" ERROR markers and spell-check "Typo" warnings on field keys should be absent. Spell-check on string values / descriptions / comments should still appear.
+3. On a non-owned YAML (no SchemaLock resolution), native inspections must still fire.
+4. Open an owned CRD file fresh (resolution arrives async): after the server-push `onState` fires, the daemon restarts and false markers clear without a manual edit.
+
+## Gradle Result
+
+`./gradlew clean test buildPlugin` — **BUILD SUCCESSFUL in 26s**. All tasks clean; 21 actionable tasks, 19 executed, 2 from cache. JUnit: all tests green (includes new `SchemalockInspectionSuppressorTest`).
+
+`./gradlew verifyPlugin` — **BUILD SUCCESSFUL in 1m 2s**. All 7 recommended IDEs: **Compatible**. Deprecation notice on IDEs 253/261/262 for `DaemonCodeAnalyzer.restart(PsiFile)` — warning only, not an error; method still present and functional within the `sinceBuild=242` target range. Pre-existing internal-API notice for `BinaryResolver` (`PluginManagerCore.getPlugin`) — not introduced by this change.
+
+## Deviations from Plan
+None. All five deliverables implemented exactly as specified. The `DaemonCodeAnalyzer.restart(PsiFile)` deprecation on newer IDE versions was anticipated as a known risk in the plan ("no debouncing, simplicity first") and does not affect the target platform (IU-2024.2 / sinceBuild 242).
+
+## Follow-ups for Other Agents
+- Reviewer: check `isSuppressedFor` PSI glue (url → owned → isKey), the `onState` restart block (threading + guard), and the `plugin.xml` / `build.gradle.kts` changes for correctness and plan conformance.
+- Manual GoLand smoke check required (criteria 3–5 in the plan) before tagging/publishing.
+- `DaemonCodeAnalyzer.restart(PsiFile)` is deprecated in platform 253+; if the plugin eventually raises `sinceBuild` past 253, switch to the replacement API (check platform release notes at that time).
+
+---
+
 # Implementation Summary
 
 ## Agent

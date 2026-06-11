@@ -1,8 +1,12 @@
 package dev.schemalock.intellij
 
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.psi.PsiManager
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -17,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap
  * already-resolved (cache-hit) documents instantly.
  */
 @Service(Service.Level.PROJECT)
-class DocumentStateBus {
+class DocumentStateBus(private val project: Project) {
 
     private val states = ConcurrentHashMap<String, DocumentState>()
 
@@ -40,6 +44,12 @@ class DocumentStateBus {
     fun onState(uri: String, state: DocumentState) {
         states[uri] = state
         widget?.onState(uri, state)
+        ApplicationManager.getApplication().invokeLater {
+            if (project.isDisposed) return@invokeLater
+            val vf = VirtualFileManager.getInstance().findFileByUrl(uri) ?: return@invokeLater
+            val psi = PsiManager.getInstance(project).findFile(vf) ?: return@invokeLater
+            DaemonCodeAnalyzer.getInstance(project).restart(psi)
+        }
     }
 
     companion object {

@@ -19,6 +19,7 @@ kotlin {
 dependencies {
     intellijPlatform {
         create("IU", "2024.2")
+        bundledPlugin("org.jetbrains.plugins.yaml")
     }
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
