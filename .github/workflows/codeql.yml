@@ -31,12 +31,20 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       # Manual build mode: CodeQL traces this compile to build its database.
-      # gradle.properties enables the build cache, which would serve compileKotlin
-      # from cache (no compiler run) and leave CodeQL with no code to analyze
-      # ("didn't build any of it"). Force a real compile with clean + no build cache.
-      # (Kotlin is pinned < 2.3.30 in build.gradle.kts so CodeQL's extractor accepts it.)
+      # - clean + --no-build-cache: gradle.properties enables the build cache,
+      #   which would serve compileKotlin from cache (no compiler run) and leave
+      #   CodeQL with no code ("didn't build any of it"). Force a real compile.
+      # - Kotlin pinned < 2.3.30 in build.gradle.kts so CodeQL's extractor accepts it.
+      # - in-process compiler + large heap: CodeQL's extractor runs inside the
+      #   Kotlin compiler process; tracing the compile against the big IntelliJ SDK
+      #   classpath OOMs the default-heap Kotlin daemon. Run in-process under a
+      #   roomy Gradle JVM instead.
       - name: Compile for CodeQL
-        run: ./gradlew --no-daemon --no-build-cache clean compileKotlin compileTestKotlin
+        env:
+          GRADLE_OPTS: "-Xmx6g"
+        run: >
+          ./gradlew --no-daemon --no-build-cache clean compileKotlin compileTestKotlin
+          -Pkotlin.compiler.execution.strategy=in-process
 
       - uses: github/codeql-action/analyze@v4
         with:
