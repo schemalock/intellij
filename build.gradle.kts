@@ -25,7 +25,7 @@ dependencies {
         bundledPlugin("org.jetbrains.plugins.yaml")
     }
     testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.14.4")
     // Gradle 9 no longer puts the JUnit Platform launcher on the test runtime
     // classpath automatically — declare it explicitly.
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
