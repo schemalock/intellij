@@ -11,6 +11,10 @@ updates:
         update-types: ["version-update:semver-major"]
       # Kotlin pinned < 2.3.30 for CodeQL extractor support (2.4.0 is rejected).
       # Bump manually once GitHub's CodeQL adds newer Kotlin support.
+      # NB: the `kotlin("jvm")` plugin is surfaced by Dependabot under the name
+      # "jvm" (not org.jetbrains.kotlin*), so that name must be ignored directly
+      # or the pin silently misses — which is what let Kotlin 2.4.0 through once.
+      - dependency-name: "jvm"
       - dependency-name: "org.jetbrains.kotlin*"
     groups:
       gradle-deps:
