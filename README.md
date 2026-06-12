@@ -11,7 +11,7 @@ team with integrity hashes — every schema verified before use, no
 trust-on-first-use, no API key, no cloud sync.
 
 The bundled `schemalock` binary lives in
-[schemalock/app](https://github.com/schemalock/app); this repo is the
+[schemalock/schemalock](https://github.com/schemalock/schemalock); this repo is the
 thin JetBrains shell around it.
 
 ## Requirements
@@ -56,7 +56,7 @@ For reproducible validation across CI and contributors, commit a
 
 1. Add an operator pin (`schemalock` CLI is bundled with the plugin, or
    install separately with
-   `go install github.com/schemalock/app/cmd/schemalock@latest`):
+   `go install github.com/schemalock/schemalock/cmd/schemalock@latest`):
 
    ```bash
    schemalock add operator.victoriametrics.com@0.70.0
@@ -122,7 +122,7 @@ for the default flow.
 The plugin bundles binaries for `darwin-arm64`, `darwin-x64`,
 `linux-arm64`, `linux-x64`, and `win32-x64`. On an unsupported platform,
 build the `schemalock` binary yourself
-(`go install github.com/schemalock/app/cmd/schemalock@latest`).
+(`go install github.com/schemalock/schemalock/cmd/schemalock@latest`).
 
 ## Building from source
 
@@ -140,7 +140,7 @@ scripts/build-binaries.sh
 ./gradlew runIde
 ```
 
-`build-binaries.sh` expects the sibling [schemalock/app](https://github.com/schemalock/app)
+`build-binaries.sh` expects the sibling [schemalock/schemalock](https://github.com/schemalock/schemalock)
 checkout; `.app-version` pins which annotated app tag the bundled binaries
 are built from.
 
