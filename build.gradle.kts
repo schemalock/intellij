@@ -3,7 +3,9 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.4.0"
+    // Kotlin pinned below 2.3.30: CodeQL's Kotlin extractor does not yet support
+    // 2.3.30+ (it rejects 2.4.0). Bump once GitHub's CodeQL extractor catches up.
+    kotlin("jvm") version "2.2.0"
     id("org.jetbrains.intellij.platform")
 }
 

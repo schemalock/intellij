@@ -18,14 +18,25 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # Buildless extraction: CodeQL's compiler interceptor (used by build-mode
-      # "manual") caps at Kotlin < 2.3.30 and rejects our Kotlin 2.4 toolchain.
-      # build-mode "none" parses sources directly without tracing kotlinc, so it
-      # sidesteps that version gate and needs no JDK/Gradle setup.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - uses: github/codeql-action/init@v4
         with:
           languages: java-kotlin
-          build-mode: none
+          build-mode: manual
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      # Manual build mode: CodeQL traces this compile to build its database.
+      # gradle.properties enables the build cache, which would serve compileKotlin
+      # from cache (no compiler run) and leave CodeQL with no code to analyze
+      # ("didn't build any of it"). Force a real compile with clean + no build cache.
+      # (Kotlin is pinned < 2.3.30 in build.gradle.kts so CodeQL's extractor accepts it.)
+      - name: Compile for CodeQL
+        run: ./gradlew --no-daemon --no-build-cache clean compileKotlin compileTestKotlin
 
       - uses: github/codeql-action/analyze@v4
         with:

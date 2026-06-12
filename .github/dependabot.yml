@@ -9,6 +9,9 @@ updates:
       # until the tests are migrated. Minor/patch 5.x updates still flow.
       - dependency-name: "org.junit.jupiter:*"
         update-types: ["version-update:semver-major"]
+      # Kotlin pinned < 2.3.30 for CodeQL extractor support (2.4.0 is rejected).
+      # Bump manually once GitHub's CodeQL adds newer Kotlin support.
+      - dependency-name: "org.jetbrains.kotlin*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
