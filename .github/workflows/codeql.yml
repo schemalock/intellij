@@ -35,13 +35,10 @@ jobs:
       #   which would serve compileKotlin from cache (no compiler run) and leave
       #   CodeQL with no code ("didn't build any of it"). Force a real compile.
       # - Kotlin pinned < 2.3.30 in build.gradle.kts so CodeQL's extractor accepts it.
-      # - in-process compiler + large heap: CodeQL's extractor runs inside the
-      #   Kotlin compiler process; tracing the compile against the big IntelliJ SDK
-      #   classpath OOMs the default-heap Kotlin daemon. Run in-process under a
-      #   roomy Gradle JVM instead.
+      # - in-process compiler: CodeQL's extractor runs inside the Kotlin compiler
+      #   process; running it in-process keeps it in the Gradle build JVM, which
+      #   gets its heap from org.gradle.jvmargs (-Xmx4g in gradle.properties).
       - name: Compile for CodeQL
-        env:
-          GRADLE_OPTS: "-Xmx6g"
         run: >
           ./gradlew --no-daemon --no-build-cache clean compileKotlin compileTestKotlin
           -Pkotlin.compiler.execution.strategy=in-process
