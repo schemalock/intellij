@@ -12,7 +12,15 @@ updates:
       # Kotlin pinned < 2.3.30 for CodeQL extractor support (2.4.0 is rejected).
       # Bump manually once GitHub's CodeQL adds newer Kotlin support.
       - dependency-name: "org.jetbrains.kotlin*"
+    groups:
+      gradle-deps:
+        patterns:
+          - "*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
