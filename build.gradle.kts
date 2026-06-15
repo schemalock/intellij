@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "dev.schemalock"
-version = "0.1.0"
+version = "0.1.1"
 
 // Repositories are managed in settings.gradle.kts (dependencyResolutionManagement),
 // as required by the IntelliJ Platform Gradle Plugin 2.x settings plugin.
@@ -41,10 +41,10 @@ intellijPlatform {
     }
     pluginVerification {
         // Platform plugin 2.16 promotes INTERNAL_API_USAGES / DEPRECATED_API_USAGES
-        // to failures by default. We knowingly use PluginManagerCore.getPlugin
-        // (internal) in BinaryResolver and the deprecated DaemonCodeAnalyzer.restart;
-        // keep those as warnings and only fail on genuine compatibility/structure
-        // problems, as under the previous plugin version.
+        // to failures by default. We knowingly use deprecated platform LSP API
+        // (LspServer & co.) and DaemonCodeAnalyzer.restart; keep those as warnings
+        // and only fail on genuine compatibility/structure problems, as under the
+        // previous plugin version.
         failureLevel = listOf(
             VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS,
             VerifyPluginTask.FailureLevel.INVALID_PLUGIN,

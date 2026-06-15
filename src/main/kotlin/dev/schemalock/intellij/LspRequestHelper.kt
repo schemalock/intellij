@@ -12,6 +12,14 @@ import com.intellij.util.messages.MessageBusConnection
 
 object LspRequestHelper {
 
+    // The platform's LspServer.sendRequestSync has a default timeout argument.
+    // Passing it explicitly emits a direct call to sendRequestSync(int, lambda)
+    // instead of the Kotlin `sendRequestSync$default` synthetic. The synthetic
+    // moved to the LspServer super-interface (LspClient) in IU-262, which makes
+    // the omitted-arg form binary-incompatible there; the explicit form resolves
+    // on every IDE build. 10_000 ms matches the platform's omitted-arg default.
+    private const val LSP_REQUEST_TIMEOUT_MS = 10_000
+
     fun connect(project: Project, widget: DocumentStatusWidget): MessageBusConnection {
         val conn = project.messageBus.connect()
         conn.subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, object : FileEditorManagerListener {
@@ -62,7 +70,7 @@ object LspRequestHelper {
     private fun getDocumentState(project: Project, uri: String): DocumentState? {
         val server = findServer(project) ?: return null
         return try {
-            server.sendRequestSync { (it as SchemalockLspServer).getDocumentState(GetDocumentStateParams(uri)) }
+            server.sendRequestSync(LSP_REQUEST_TIMEOUT_MS) { (it as SchemalockLspServer).getDocumentState(GetDocumentStateParams(uri)) }
         } catch (_: Throwable) {
             null
         }
@@ -71,14 +79,14 @@ object LspRequestHelper {
     fun sendVersionOverride(project: Project, uri: String, version: String) {
         val server = findServer(project) ?: return
         try {
-            server.sendRequestSync { (it as SchemalockLspServer).setDocumentVersionOverride(SetVersionOverrideParams(uri, version)) }
+            server.sendRequestSync(LSP_REQUEST_TIMEOUT_MS) { (it as SchemalockLspServer).setDocumentVersionOverride(SetVersionOverrideParams(uri, version)) }
         } catch (_: Throwable) {}
     }
 
     fun listVersionsForGroup(project: Project, group: String): List<String> {
         val server = findServer(project) ?: return emptyList()
         return try {
-            server.sendRequestSync { (it as SchemalockLspServer).listVersionsForGroup(ListVersionsParams(group)) }?.versions
+            server.sendRequestSync(LSP_REQUEST_TIMEOUT_MS) { (it as SchemalockLspServer).listVersionsForGroup(ListVersionsParams(group)) }?.versions
                 ?: emptyList()
         } catch (_: Exception) {
             emptyList()
