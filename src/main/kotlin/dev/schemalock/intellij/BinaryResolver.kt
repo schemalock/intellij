@@ -1,21 +1,20 @@
 package dev.schemalock.intellij
 
-import com.intellij.ide.plugins.PluginManager
 import com.intellij.openapi.util.SystemInfo
 import java.io.File
+import java.nio.file.Path
 
 object BinaryResolver {
 
-    fun resolve(): File {
-        // PluginManager.getPluginByClass is the public, non-internal way to obtain
-        // our own plugin descriptor: it resolves the plugin from this class's
-        // PluginAwareClassLoader, so no hardcoded plugin id is needed.
-        // (PluginManagerCore.getPlugin is @ApiStatus.Internal — Marketplace rejects it.)
-        val plugin = PluginManager.getPluginByClass(BinaryResolver::class.java)
-            ?: error("SchemaLock plugin not found in plugin manager")
+    // [pluginPath] is the plugin's install directory, supplied by the LSP support
+    // provider via PluginAware.setPluginDescriptor. We deliberately do NOT look the
+    // plugin up through PluginManager/PluginManagerCore: every descriptor-lookup
+    // method on those is @ApiStatus.Internal as of IU-262 and Marketplace rejects
+    // internal-API usage.
+    fun resolve(pluginPath: Path): File {
         val dir = platformDir(System.getProperty("os.name"), System.getProperty("os.arch"))
         val name = if (SystemInfo.isWindows) "schemalock.exe" else "schemalock"
-        val binary = plugin.pluginPath.resolve("bin/$dir/$name").toFile()
+        val binary = pluginPath.resolve("bin/$dir/$name").toFile()
         if (!SystemInfo.isWindows) {
             binary.setExecutable(true, false)
         }
