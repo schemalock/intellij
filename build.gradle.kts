@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "dev.schemalock"
-version = "0.1.0"
+version = "0.1.1"
 
 // Repositories are managed in settings.gradle.kts (dependencyResolutionManagement),
 // as required by the IntelliJ Platform Gradle Plugin 2.x settings plugin.
